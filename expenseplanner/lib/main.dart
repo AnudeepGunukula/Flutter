@@ -55,65 +55,82 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with WidgetsBindingObserver {
   List<Transaction> _userTransactions = [
-    Transaction(
-      id: DateTime.now().toString(),
-      title: 'test1',
-      amount: 100,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: DateTime.now().add(Duration(hours: 1)).toString(),
-      title: 'test1',
-      amount: 100,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: DateTime.now().add(Duration(hours: 2)).toString(),
-      title: 'test1',
-      amount: 100,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: DateTime.now().add(Duration(hours: 3)).toString(),
-      title: 'test1',
-      amount: 100,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: DateTime.now().add(Duration(hours: 4)).toString(),
-      title: 'test1',
-      amount: 100,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: DateTime.now().add(Duration(hours: 5)).toString(),
-      title: 'test1',
-      amount: 100,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: DateTime.now().add(Duration(hours: 6)).toString(),
-      title: 'test1',
-      amount: 100,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: DateTime.now().add(Duration(hours: 7)).toString(),
-      title: 'test1',
-      amount: 100,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: DateTime.now().add(Duration(hours: 8)).toString(),
-      title: 'test1',
-      amount: 100,
-      date: DateTime.now(),
-    ),
+    // Transaction(
+    //   id: DateTime.now().toString(),
+    //   title: 'test1',
+    //   amount: 100,
+    //   date: DateTime.now(),
+    // ),
+    // Transaction(
+    //   id: DateTime.now().add(Duration(hours: 1)).toString(),
+    //   title: 'test1',
+    //   amount: 100,
+    //   date: DateTime.now(),
+    // ),
+    // Transaction(
+    //   id: DateTime.now().add(Duration(hours: 2)).toString(),
+    //   title: 'test1',
+    //   amount: 100,
+    //   date: DateTime.now(),
+    // ),
+    // Transaction(
+    //   id: DateTime.now().add(Duration(hours: 3)).toString(),
+    //   title: 'test1',
+    //   amount: 100,
+    //   date: DateTime.now(),
+    // ),
+    // Transaction(
+    //   id: DateTime.now().add(Duration(hours: 4)).toString(),
+    //   title: 'test1',
+    //   amount: 100,
+    //   date: DateTime.now(),
+    // ),
+    // Transaction(
+    //   id: DateTime.now().add(Duration(hours: 5)).toString(),
+    //   title: 'test1',
+    //   amount: 100,
+    //   date: DateTime.now(),
+    // ),
+    // Transaction(
+    //   id: DateTime.now().add(Duration(hours: 6)).toString(),
+    //   title: 'test1',
+    //   amount: 100,
+    //   date: DateTime.now(),
+    // ),
+    // Transaction(
+    //   id: DateTime.now().add(Duration(hours: 7)).toString(),
+    //   title: 'test1',
+    //   amount: 100,
+    //   date: DateTime.now(),
+    // ),
+    // Transaction(
+    //   id: DateTime.now().add(Duration(hours: 8)).toString(),
+    //   title: 'test1',
+    //   amount: 100,
+    //   date: DateTime.now(),
+    // ),
   ];
 
   bool _showChart = false;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance!.addObserver(this);
+    super.initState();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print(state);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance!.removeObserver(this);
+    super.dispose();
+  }
 
   List<Transaction> get _recentTransactions {
     return _userTransactions.where((tx) {
@@ -156,6 +173,49 @@ class _HomeState extends State<Home> {
     });
   }
 
+  List<Widget> _buildLandscapeContent(
+      MediaQueryData mediaQuery, AppBar appBar, Widget txListwidget) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text('Show Chart'),
+          Switch.adaptive(
+            activeColor: Theme.of(context).accentColor,
+            value: _showChart,
+            onChanged: (bool value) {
+              setState(() {
+                _showChart = value;
+              });
+            },
+          ),
+        ],
+      ),
+      _showChart
+          ? Container(
+              height: (mediaQuery.size.height -
+                      appBar.preferredSize.height -
+                      mediaQuery.padding.top) *
+                  0.7,
+              child: Chart(_recentTransactions))
+          : txListwidget,
+    ];
+  }
+
+  List<Widget> _buildPotraitContent(
+      MediaQueryData mediaQuery, AppBar appBar, Widget txListWidget) {
+    return [
+      Container(
+        height: (mediaQuery.size.height -
+                appBar.preferredSize.height -
+                mediaQuery.padding.top) *
+            0.3,
+        child: Chart(_recentTransactions),
+      ),
+      txListWidget,
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -188,38 +248,9 @@ class _HomeState extends State<Home> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             if (isLandscape)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text('Show Chart'),
-                  Switch.adaptive(
-                    activeColor: Theme.of(context).accentColor,
-                    value: _showChart,
-                    onChanged: (bool value) {
-                      setState(() {
-                        _showChart = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
+              ..._buildLandscapeContent(mediaQuery, appBar, txListwidget),
             if (!isLandscape)
-              Container(
-                  height: (mediaQuery.size.height -
-                          appBar.preferredSize.height -
-                          mediaQuery.padding.top) *
-                      0.3,
-                  child: Chart(_recentTransactions)),
-            if (!isLandscape) txListwidget,
-            if (isLandscape)
-              _showChart
-                  ? Container(
-                      height: (mediaQuery.size.height -
-                              appBar.preferredSize.height -
-                              mediaQuery.padding.top) *
-                          0.7,
-                      child: Chart(_recentTransactions))
-                  : txListwidget,
+              ..._buildPotraitContent(mediaQuery, appBar, txListwidget),
           ],
         ),
       ),

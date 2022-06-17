@@ -9,10 +9,14 @@ class NewTransaction extends StatefulWidget {
   NewTransaction(this.addTransaction);
 
   @override
-  State<NewTransaction> createState() => _NewTransactionState();
+  State<NewTransaction> createState() {
+    return _NewTransactionState();
+  }
 }
 
 class _NewTransactionState extends State<NewTransaction> {
+  _NewTransactionState();
+
   final _titleController = TextEditingController();
 
   final _amountController = TextEditingController();
@@ -49,6 +53,7 @@ class _NewTransactionState extends State<NewTransaction> {
 
   @override
   Widget build(BuildContext context) {
+    // print('building build()');
     return SingleChildScrollView(
       child: Card(
         child: Container(
